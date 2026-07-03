@@ -1,0 +1,22 @@
+# Ortam değişkenleri / sırlar
+.env
+.env.*
+!.env.example
+
+# Derlenmiş binary'ler
+/bin/
+tagla
+*.exe
+
+# Test & coverage
+*.out
+coverage.*
+
+# Go workspace
+go.work
+go.work.sum
+
+# OS / editör
+.DS_Store
+.idea/
+*.swp
