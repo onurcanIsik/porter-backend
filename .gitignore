@@ -5,7 +5,7 @@
 
 # Derlenmiş binary'ler
 /bin/
-tagla
+porter
 *.exe
 
 # Test & coverage
