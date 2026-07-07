@@ -1,9 +1,10 @@
 package service
 
 import (
-	"fmt"
 	"porter/models"
 	"porter/pkg/jwt"
+
+	"github.com/google/uuid"
 )
 
 type UserService struct {
@@ -18,14 +19,41 @@ func NewUserService(userRepo models.UserModelRepository, tokenManager *jwt.JWTMa
 	}
 }
 
-func (s *UserService) RegisterUser(req *models.UserModelCreate) (*models.UserModel, error) {
+func (s *UserService) LoginOrRegister(req *models.UserModelCreate) (accessToken string, refreshToken string, err error) {
 	existingUser, err := s.userRepo.GetUserByMail(req.UserMail)
 	if err != nil {
-		return nil, err
+		return "", "", err
 	}
 	if existingUser != nil {
-		return nil, fmt.Errorf("user with email %s already exists", req.UserMail)
+		accessToken, refreshToken, err = s.tokenManager.GenerateToken(existingUser.ID.String())
+		if err != nil {
+			return "", "", err
+		}
+		return accessToken, refreshToken, nil
 	}
 
-	return nil, nil
+	newUser := &models.UserModel{
+		ID:             uuid.New(),
+		UserMail:       req.UserMail,
+		UserName:       req.UserName,
+		UserProfileUrl: req.UserProfileUrl,
+		UserTokenCount: req.UserTokenCount,
+		UserJobTitle:   req.UserJobTitle,
+		UserDeviceId:   req.UserDeviceId,
+		UserCreatedAt:  req.UserCreatedAt,
+		UserUpdatedAt:  req.UserUpdatedAt,
+		Provider:       req.Provider,
+		ProviderId:     req.ProviderId,
+	}
+
+	if err = s.userRepo.CreateUser(newUser); err != nil {
+		return "", "", err
+	}
+
+	accessToken, refreshToken, err = s.tokenManager.GenerateToken(newUser.ID.String())
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
 }
