@@ -96,13 +96,12 @@ func (h *UserHandler) GoogleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, refreshToken, err := h.userService.LoginOrRegister(&models.UserModelCreate{
+	accessToken, refreshToken, err := h.userService.LoginOrRegister(&models.UserModel{
 		Provider:       "google",
 		ProviderId:     googleUser.ID,
 		UserMail:       googleUser.Email,
 		UserName:       googleUser.Name,
 		UserProfileUrl: "",
-		UserTokenCount: 0,
 		UserJobTitle:   "",
 		UserDeviceId:   "",
 		UserCreatedAt:  time.Now(),

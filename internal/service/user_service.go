@@ -19,7 +19,7 @@ func NewUserService(userRepo models.UserModelRepository, tokenManager *jwt.JWTMa
 	}
 }
 
-func (s *UserService) LoginOrRegister(req *models.UserModelCreate) (accessToken string, refreshToken string, err error) {
+func (s *UserService) LoginOrRegister(req *models.UserModel) (accessToken string, refreshToken string, err error) {
 	existingUser, err := s.userRepo.GetUserByMail(req.UserMail)
 	if err != nil {
 		return "", "", err
@@ -37,7 +37,6 @@ func (s *UserService) LoginOrRegister(req *models.UserModelCreate) (accessToken 
 		UserMail:       req.UserMail,
 		UserName:       req.UserName,
 		UserProfileUrl: req.UserProfileUrl,
-		UserTokenCount: req.UserTokenCount,
 		UserJobTitle:   req.UserJobTitle,
 		UserDeviceId:   req.UserDeviceId,
 		UserCreatedAt:  req.UserCreatedAt,

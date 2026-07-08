@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS users (
     user_name VARCHAR(255) NOT NULL,
     user_profile_url VARCHAR(255),
     is_premium BOOLEAN DEFAULT FALSE,
-    user_token_count INTEGER DEFAULT 0,
     user_job_title VARCHAR(255) DEFAULT 'Software Engineer',
     user_device_id VARCHAR(255),
     user_created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
