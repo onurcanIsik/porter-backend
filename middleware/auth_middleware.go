@@ -27,7 +27,7 @@ func RequireAuth(manager *jwt.JWTManager) func(http.Handler) http.Handler {
 				return
 			}
 
-			userID, err := manager.ValidateToken(tokenString)
+			userID, err := manager.ValidateToken(tokenString, "access")
 			if err != nil {
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return

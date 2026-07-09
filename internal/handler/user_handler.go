@@ -8,6 +8,7 @@ import (
 	"porter/internal/service"
 	"porter/models"
 	apprand "porter/pkg/crypto"
+	"porter/pkg/jwt"
 	"time"
 )
 
@@ -16,12 +17,14 @@ var req struct {
 }
 
 type UserHandler struct {
-	userService *service.UserService
+	userService  *service.UserService
+	tokenManager *jwt.JWTManager
 }
 
-func NewUserHandler(userService *service.UserService) *UserHandler {
+func NewUserHandler(userService *service.UserService, tokenManager *jwt.JWTManager) *UserHandler {
 	return &UserHandler{
-		userService: userService,
+		userService:  userService,
+		tokenManager: tokenManager,
 	}
 }
 
@@ -109,6 +112,30 @@ func (h *UserHandler) GoogleCallback(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		http.Error(w, "Failed to login or register user", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	})
+}
+
+func (h *UserHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		RefreshToken string `json:"refresh_token"`
+	}
+
+	bodyParse := json.NewDecoder(r.Body).Decode(&req)
+	if err := bodyParse; err != nil {
+		http.Error(w, "Failed to parse request body", http.StatusBadRequest)
+		return
+	}
+
+	accessToken, refreshToken, err := h.userService.RefreshTokens(req.RefreshToken)
+	if err != nil {
+		http.Error(w, "Failed to refresh token", http.StatusInternalServerError)
 		return
 	}
 

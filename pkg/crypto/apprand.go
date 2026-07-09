@@ -2,6 +2,7 @@ package apprand
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 )
 
@@ -21,4 +22,9 @@ func GenerateRandomSafeString(length int) (string, error) {
 	}
 
 	return base64.URLEncoding.EncodeToString(b), err
+}
+
+func HashToken(token string) string {
+	sum := sha256.Sum256([]byte(token))
+	return base64.URLEncoding.EncodeToString(sum[:])
 }

@@ -41,12 +41,13 @@ func main() {
 
 	// REPOS
 	userRepo := repo.NewUserRepo(database)
+	refreshTokenRepo := repo.NewRefreshTokenRepo(database)
 
 	// SERVICES
-	userService := service.NewUserService(userRepo, jwtManager)
+	userService := service.NewUserService(userRepo, jwtManager, refreshTokenRepo)
 
 	// HANDLERS
-	userHandler := handler.NewUserHandler(userService)
+	userHandler := handler.NewUserHandler(userService, jwtManager)
 
 	// ROUTERS
 
@@ -55,8 +56,12 @@ func main() {
 	rateLimiter := middleware.NewRateLimiter()
 	wrappedMux := rateLimiter.Middleware(mux)
 
-	mux.HandleFunc("api/auth/google", userHandler.GoogleLogin)
-	mux.HandleFunc("/google_callback", userHandler.GoogleCallback)
+	// AUTH
+	mux.HandleFunc("/api/auth/google", userHandler.GoogleLogin)
+	mux.HandleFunc("/api/auth/google_callback", userHandler.GoogleCallback)
+
+	// REFRESH TOKEN
+	mux.HandleFunc("POST /api/refresh", userHandler.RefreshToken)
 
 	log.Fatal(http.ListenAndServe(":8080", wrappedMux))
 }
