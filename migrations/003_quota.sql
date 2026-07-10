@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS quota (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL UNIQUE,
+    request_count INT NOT NULL DEFAULT 0,
+    bandwidth_used BIGINT NOT NULL DEFAULT 0,
+    reset_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
