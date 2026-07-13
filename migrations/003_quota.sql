@@ -1,8 +1,9 @@
 CREATE TABLE IF NOT EXISTS quota (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL UNIQUE,
-    request_count INT NOT NULL DEFAULT 0,
-    bandwidth_used BIGINT NOT NULL DEFAULT 0,
+    quota_request INT NOT NULL DEFAULT 0,
+    quota_bandwidth BIGINT NOT NULL DEFAULT 0,
+    quota_endpoint VARCHAR(255) NOT NULL,
     reset_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

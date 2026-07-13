@@ -42,12 +42,15 @@ func main() {
 	// REPOS
 	userRepo := repo.NewUserRepo(database)
 	refreshTokenRepo := repo.NewRefreshTokenRepo(database)
+	quotaRepo := repo.NewQuotaRepo(database)
 
 	// SERVICES
 	userService := service.NewUserService(userRepo, jwtManager, refreshTokenRepo)
+	quotaService := service.NewQuotaService(quotaRepo)
 
 	// HANDLERS
 	userHandler := handler.NewUserHandler(userService, jwtManager)
+	quotaHandler := handler.NewQuotaHandler(quotaService)
 
 	// ROUTERS
 
@@ -62,6 +65,10 @@ func main() {
 
 	// REFRESH TOKEN
 	mux.HandleFunc("POST /api/refresh", userHandler.RefreshToken)
+
+	// QUOTA
+	mux.HandleFunc("/api/quota", quotaHandler.GetQuotaByUserID)
+	mux.HandleFunc("/api/quota/update", quotaHandler.UpdateQuota)
 
 	log.Fatal(http.ListenAndServe(":8080", wrappedMux))
 }

@@ -19,5 +19,5 @@ type QuotaModel struct {
 
 type QuotaModelRepository interface {
 	GetQuotaByUserID(userID uuid.UUID) (*QuotaModel, error)
-	UpdateQuota(quota *QuotaModel) error
+	UpdateQuota(userID uuid.UUID, quotaRequest, quotaEndpoint, quotaBandwidth int) error
 }
