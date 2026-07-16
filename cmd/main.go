@@ -43,20 +43,24 @@ func main() {
 	userRepo := repo.NewUserRepo(database)
 	refreshTokenRepo := repo.NewRefreshTokenRepo(database)
 	quotaRepo := repo.NewQuotaRepo(database)
+	projectsRepo := repo.NewProjectsRepo(database)
 
 	// SERVICES
 	userService := service.NewUserService(userRepo, jwtManager, refreshTokenRepo)
 	quotaService := service.NewQuotaService(quotaRepo)
+	projectsService := service.NewProjectsService(projectsRepo)
 
 	// HANDLERS
 	userHandler := handler.NewUserHandler(userService, jwtManager)
 	quotaHandler := handler.NewQuotaHandler(quotaService)
+	projectsHandler := handler.NewProjectsHandler(projectsService)
 
 	// ROUTERS
 
 	mux := http.NewServeMux()
 
 	rateLimiter := middleware.NewRateLimiter()
+	requireAuth := middleware.RequireAuth(jwtManager)
 	wrappedMux := rateLimiter.Middleware(mux)
 
 	// AUTH
@@ -67,8 +71,15 @@ func main() {
 	mux.HandleFunc("POST /api/refresh", userHandler.RefreshToken)
 
 	// QUOTA
-	mux.HandleFunc("/api/quota", quotaHandler.GetQuotaByUserID)
-	mux.HandleFunc("/api/quota/update", quotaHandler.UpdateQuota)
+	mux.Handle("GET /api/quota", requireAuth(http.HandlerFunc(quotaHandler.GetQuotaByUserID)))
+	mux.Handle("PUT /api/quota/update", requireAuth(http.HandlerFunc(quotaHandler.UpdateQuota)))
+
+	// PROJECTS
+	mux.Handle("GET /api/projects", requireAuth(http.HandlerFunc(projectsHandler.GetProjectsService)))
+	mux.Handle("POST /api/projects", requireAuth(http.HandlerFunc(projectsHandler.CreateProject)))
+	mux.Handle("GET /api/projects/{id}", requireAuth(http.HandlerFunc(projectsHandler.GetProjectByID)))
+	mux.Handle("PUT /api/projects/{id}", requireAuth(http.HandlerFunc(projectsHandler.UpdateProject)))
+	mux.Handle("DELETE /api/projects/{id}", requireAuth(http.HandlerFunc(projectsHandler.DeleteProject)))
 
 	log.Fatal(http.ListenAndServe(":8080", wrappedMux))
 }

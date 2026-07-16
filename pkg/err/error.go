@@ -12,6 +12,8 @@ func NewError(code int, message string) *Error {
 	}
 }
 
+var ErrNotFound = NewError(404, "resource not found")
+
 func (e *Error) Error() string {
 	return e.Message
 }
